@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "active-win": "^9.0.0",
+    "express": "^4.19.2",
+    "node": "^22.6.0",
+    "screenshot-desktop": "^1.15.0"
+  }
+}
