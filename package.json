@@ -4,5 +4,13 @@
     "express": "^4.19.2",
     "node": "^22.6.0",
     "screenshot-desktop": "^1.15.0"
+  },
+  "scripts": {
+    "dev": "vercel dev --debug",
+    "start": "vercel dev",
+    "build": "vercel build",
+  }
+  "devDependencies": {
+    "vercel": "^37.3.0"
   }
 }

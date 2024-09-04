@@ -1,34 +1,45 @@
 //All doc requirements go here
 const express = require('express');
 const path = require('path');
-const fs = require('fs')
-
+const fs = require('fs');
 
 
 //initatize express into an app for calling
 const app = express();
-app.use(express.json())
-app.use(express.static(path.join(__dirname, 'public')))
+app.use(express.json());
 
-const data = {
+// ----
+// Removing this line because now we are using @vercel/static to serve static assets
+// ----
+// app.use(express.static(path.join(__dirname, 'public')));
 
-}
+// const data = {
+// }
 
+// ----
+// Removing this block because it's duplicating with what we do in Line 11.
+// In fact, this is just a subset of what we do in Line 11, since we are only
+// serving the index.html file here whereas in Line 11 we are serving the entire
+// public folder.
+// ----
+// app.get('/', (req, res) => {
+//     res.sendFile(path.join(__dirname, 'public', index.html), function (err) {
+//         if (err) {
+//             console.log('Error sending file: ' + err);
+//             res.status(500).send('Error sending file');
+//         } else {
+//             console.log('File sent:')
+//         }
+//     })
+// })
 
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', index.html), function (err) {
-        if (err) {
-            console.log('Error sending file: ' + err);
-            res.status(500).send('Error sending file');
-        } else {
-            console.log('File sent:')
-        }
-    })
-})
-
-app.listen(5000, () => {
-    console.log('Server running at 5000')
-})
+// ----
+// Removing this block because now @vercel/node should handle how to setup, run
+// and attach the server
+// ----
+// app.listen(5000, () => {
+//     console.log('Server running at 5000');
+// });
 
 // app.post('/data', async (req, res) => {
 //     const result = await req.body;
@@ -50,20 +61,21 @@ app.listen(5000, () => {
 //     })
 // })
 
-app.get('/data', (req, res) => {
+
+let getTasks = (req, res) => {
     fs.readFile('tasks.txt', {
         encoding: 'utf-8'
     }, (err, data) => {
         if (err) {
-            console.log(err)
-            res.status(500).send('An error occurred' + err)
+            console.log(err);
+            res.status(500).send('An error occurred' + err);
         } else {
-            res.send(data)
+            res.send(data);
         }
-    })
-})
+    });
+};
 
-app.delete('/data', (req, res) => {
+let deleteTask = (req, res) => {
     const idToDel = req.body.id;
 
     fs.readFile('tasks.txt', {
@@ -71,50 +83,50 @@ app.delete('/data', (req, res) => {
     }, async (err, data) => {
         try {
             if (err) {
-                console.log(err)
-                res.status(500).send('An error occurred' + err)
+                console.log(err);
+                res.status(500).send('An error occurred' + err);
             } else {
                 //find the id 
                 //then remove the json with the id
-                const jsonmeth = JSON.parse(data)
-                const itemToDel = jsonmeth.find(item => item.task == idToDel)
+                const jsonmeth = JSON.parse(data);
+                const itemToDel = jsonmeth.find(item => item.task == idToDel);
                 if (itemToDel === -1) {
-                    res.sendStatus(500).send('Error on itemtodel')
+                    res.sendStatus(500).send('Error on itemtodel');
                     return;
                 }
-                const indexOfItem = jsonmeth.indexOf(itemToDel)
-                const x = jsonmeth.splice(indexOfItem, 1)
-                const updatedValues = JSON.stringify(jsonmeth, null, 2)
+                const indexOfItem = jsonmeth.indexOf(itemToDel);
+                const x = jsonmeth.splice(indexOfItem, 1);
+                const updatedValues = JSON.stringify(jsonmeth, null, 2);
 
                 // write file after matching
                 fs.writeFile('tasks.txt', updatedValues, (writeErr) => {
                     if (writeErr) {
                         console.log(writeErr);
-                        return res.status(500).send('Error writing to the file');
+                        res.status(500).send('Error writing to the file');
                     } else {
                         res.status(204).send('Delete and update done');
-                        console.log('dpne write')
+                        console.log('dpne write');
                     }
                 });
             }
         } catch (err) {
-            console.log('ERRORRR at delete post' + err)
+            console.log('ERRORRR at delete post' + err);
         }
-    })
-})
+    });
+};
 
 
 
 //from chatGPT
 
-app.post('/data', async (req, res) => {
+let newTask = async (req, res) => {
     const newTask = req.body; // New task object from the request body
 
     // Step 1: Read the existing file content
     fs.readFile('tasks.txt', 'utf8', (err, data) => {
         if (err && err.code !== 'ENOENT') { // Ignore the error if file doesn't exist
             console.log(err);
-            return res.status(500).send('Error reading the file');
+            res.status(500).send('Error reading the file');
         }
 
         let tasksArray = [];
@@ -125,7 +137,7 @@ app.post('/data', async (req, res) => {
                 tasksArray = JSON.parse(data); // Parse existing data as an array
             } catch (parseError) {
                 console.log(parseError);
-                return res.status(500).send('Error parsing the file content');
+                res.status(500).send('Error parsing the file content');
             }
         }
 
@@ -139,14 +151,14 @@ app.post('/data', async (req, res) => {
         fs.writeFile('tasks.txt', updatedData, (writeErr) => {
             if (writeErr) {
                 console.log(writeErr);
-                return res.status(500).send('Error writing to the file');
+                res.status(500).send('Error writing to the file');
             }
 
             console.log('File successfully updated');
             res.status(200).send('Task added successfully');
         });
     });
-});
+};
 
 // function reWriteFile(val) {
 //     fs.writeFile('tasks.txt', val, (writeErr) => {
@@ -158,3 +170,28 @@ app.post('/data', async (req, res) => {
 //         }
 //     });
 // }
+
+app.use(async (req, res) => {
+    console.debug(req.method, req.url);
+    switch (req.url) {
+        case '/data':
+            switch (req.method) {
+                case 'GET':
+                    await getTasks(req, res);
+                    break;
+                case 'POST':
+                    await newTask(req, res);
+                    break;
+                case 'DELETE':
+                    await deleteTask(req, res);
+                    break;
+                default:
+                    res.status(400).json({ok: false, error: 'Method not allowed'});
+            }
+            break;
+        default:
+            res.status(404).json({ok: false, error: 'Route not found'});
+    }
+});
+
+module.exports = app;
