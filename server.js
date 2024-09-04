@@ -53,20 +53,21 @@ app.listen(5000, () => {
 //     })
 // })
 
-app.get('/data', (req, res) => {
+
+let getTasks = (req, res) => {
     fs.readFile('tasks.txt', {
         encoding: 'utf-8'
     }, (err, data) => {
         if (err) {
-          console.log(err);
-          res.status(500).send('An error occurred' + err);
+            console.log(err);
+            res.status(500).send('An error occurred' + err);
         } else {
-          res.send(data);
+            res.send(data);
         }
     });
-});
+};
 
-app.delete('/data', (req, res) => {
+let deleteTask = (req, res) => {
     const idToDel = req.body.id;
 
     fs.readFile('tasks.txt', {
@@ -104,13 +105,13 @@ app.delete('/data', (req, res) => {
             console.log('ERRORRR at delete post' + err);
         }
     });
-});
+};
 
 
 
 //from chatGPT
 
-app.post('/data', async (req, res) => {
+let newTask = async (req, res) => {
     const newTask = req.body; // New task object from the request body
 
     // Step 1: Read the existing file content
@@ -149,7 +150,7 @@ app.post('/data', async (req, res) => {
             res.status(200).send('Task added successfully');
         });
     });
-});
+};
 
 // function reWriteFile(val) {
 //     fs.writeFile('tasks.txt', val, (writeErr) => {
@@ -161,3 +162,26 @@ app.post('/data', async (req, res) => {
 //         }
 //     });
 // }
+
+app.use(async (req, res) => {
+    console.debug(req.method, req.url);
+    switch (req.url) {
+        case '/data':
+            switch (req.method) {
+                case 'GET':
+                    await getTasks(req, res);
+                    break;
+                case 'POST':
+                    await newTask(req, res);
+                    break;
+                case 'DELETE':
+                    await deleteTask(req, res);
+                    break;
+                default:
+                    res.status(400).json({ok: false, error: 'Method not allowed'});
+            }
+            break;
+        default:
+            res.status(404).json({ok: false, error: 'Route not found'});
+    }
+});
