@@ -7,7 +7,11 @@ const fs = require('fs');
 //initatize express into an app for calling
 const app = express();
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+
+// ----
+// Removing this line because now we are using @vercel/static to serve static assets
+// ----
+// app.use(express.static(path.join(__dirname, 'public')));
 
 // const data = {
 // }
@@ -29,9 +33,13 @@ app.use(express.static(path.join(__dirname, 'public')));
 //     })
 // })
 
-app.listen(5000, () => {
-    console.log('Server running at 5000');
-});
+// ----
+// Removing this block because now @vercel/node should handle how to setup, run
+// and attach the server
+// ----
+// app.listen(5000, () => {
+//     console.log('Server running at 5000');
+// });
 
 // app.post('/data', async (req, res) => {
 //     const result = await req.body;
@@ -185,3 +193,5 @@ app.use(async (req, res) => {
             res.status(404).json({ok: false, error: 'Route not found'});
     }
 });
+
+module.exports = app;
