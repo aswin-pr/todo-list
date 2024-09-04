@@ -1,34 +1,37 @@
 //All doc requirements go here
 const express = require('express');
 const path = require('path');
-const fs = require('fs')
-
+const fs = require('fs');
 
 
 //initatize express into an app for calling
 const app = express();
-app.use(express.json())
-app.use(express.static(path.join(__dirname, 'public')))
+app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
 
-const data = {
+// const data = {
+// }
 
-}
-
-
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', index.html), function (err) {
-        if (err) {
-            console.log('Error sending file: ' + err);
-            res.status(500).send('Error sending file');
-        } else {
-            console.log('File sent:')
-        }
-    })
-})
+// ----
+// Removing this block because it's duplicating with what we do in Line 11.
+// In fact, this is just a subset of what we do in Line 11, since we are only
+// serving the index.html file here whereas in Line 11 we are serving the entire
+// public folder.
+// ----
+// app.get('/', (req, res) => {
+//     res.sendFile(path.join(__dirname, 'public', index.html), function (err) {
+//         if (err) {
+//             console.log('Error sending file: ' + err);
+//             res.status(500).send('Error sending file');
+//         } else {
+//             console.log('File sent:')
+//         }
+//     })
+// })
 
 app.listen(5000, () => {
-    console.log('Server running at 5000')
-})
+    console.log('Server running at 5000');
+});
 
 // app.post('/data', async (req, res) => {
 //     const result = await req.body;
@@ -55,13 +58,13 @@ app.get('/data', (req, res) => {
         encoding: 'utf-8'
     }, (err, data) => {
         if (err) {
-            console.log(err)
-            res.status(500).send('An error occurred' + err)
+          console.log(err);
+          res.status(500).send('An error occurred' + err);
         } else {
-            res.send(data)
+          res.send(data);
         }
-    })
-})
+    });
+});
 
 app.delete('/data', (req, res) => {
     const idToDel = req.body.id;
@@ -71,37 +74,37 @@ app.delete('/data', (req, res) => {
     }, async (err, data) => {
         try {
             if (err) {
-                console.log(err)
-                res.status(500).send('An error occurred' + err)
+                console.log(err);
+                res.status(500).send('An error occurred' + err);
             } else {
                 //find the id 
                 //then remove the json with the id
-                const jsonmeth = JSON.parse(data)
-                const itemToDel = jsonmeth.find(item => item.task == idToDel)
+                const jsonmeth = JSON.parse(data);
+                const itemToDel = jsonmeth.find(item => item.task == idToDel);
                 if (itemToDel === -1) {
-                    res.sendStatus(500).send('Error on itemtodel')
+                    res.sendStatus(500).send('Error on itemtodel');
                     return;
                 }
-                const indexOfItem = jsonmeth.indexOf(itemToDel)
-                const x = jsonmeth.splice(indexOfItem, 1)
-                const updatedValues = JSON.stringify(jsonmeth, null, 2)
+                const indexOfItem = jsonmeth.indexOf(itemToDel);
+                const x = jsonmeth.splice(indexOfItem, 1);
+                const updatedValues = JSON.stringify(jsonmeth, null, 2);
 
                 // write file after matching
                 fs.writeFile('tasks.txt', updatedValues, (writeErr) => {
                     if (writeErr) {
                         console.log(writeErr);
-                        return res.status(500).send('Error writing to the file');
+                        res.status(500).send('Error writing to the file');
                     } else {
                         res.status(204).send('Delete and update done');
-                        console.log('dpne write')
+                        console.log('dpne write');
                     }
                 });
             }
         } catch (err) {
-            console.log('ERRORRR at delete post' + err)
+            console.log('ERRORRR at delete post' + err);
         }
-    })
-})
+    });
+});
 
 
 
@@ -114,7 +117,7 @@ app.post('/data', async (req, res) => {
     fs.readFile('tasks.txt', 'utf8', (err, data) => {
         if (err && err.code !== 'ENOENT') { // Ignore the error if file doesn't exist
             console.log(err);
-            return res.status(500).send('Error reading the file');
+            res.status(500).send('Error reading the file');
         }
 
         let tasksArray = [];
@@ -125,7 +128,7 @@ app.post('/data', async (req, res) => {
                 tasksArray = JSON.parse(data); // Parse existing data as an array
             } catch (parseError) {
                 console.log(parseError);
-                return res.status(500).send('Error parsing the file content');
+                res.status(500).send('Error parsing the file content');
             }
         }
 
@@ -139,7 +142,7 @@ app.post('/data', async (req, res) => {
         fs.writeFile('tasks.txt', updatedData, (writeErr) => {
             if (writeErr) {
                 console.log(writeErr);
-                return res.status(500).send('Error writing to the file');
+                res.status(500).send('Error writing to the file');
             }
 
             console.log('File successfully updated');
